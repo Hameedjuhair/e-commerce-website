@@ -15,7 +15,7 @@ const products = [
         id: '3',
         name: 'Leather Laptop Bag',
         price: 89.99,
-        image: 'images/lap bag.png'
+        image: 'images/lap-bag.png' // Fixed filename (removed space)
     },
     {
         id: '4',
@@ -27,12 +27,12 @@ const products = [
         id: '5',
         name: 'Wireless Charging Pad',
         price: 29.99,
-        image: 'images/charging pad.png'
+        image: 'images/charging-pad.png' // Fixed filename (removed space)
     },
     {
         id: '6',
         name: 'Premium Coffee Maker',
         price: 159.99,
-        image: 'images/coffee maker.png'
+        image: 'images/coffee-maker.png' // Fixed filename (removed space)
     }
 ];
