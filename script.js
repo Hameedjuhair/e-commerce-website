@@ -1,11 +1,25 @@
-// Cart state
+const API_BASE_URL = "https://pe8wxvomy6.execute-api.us-east-1.amazonaws.com/prod/cart"; // Replace with your actual API Gateway URL
+
 let cart = [];
 
 // Initialize the page
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchCart();
     renderProducts();
     updateCartCount();
 });
+
+// Fetch cart from DynamoDB
+async function fetchCart() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/123`); // Replace "123" with actual user ID
+        const data = await response.json();
+        cart = data;
+        updateCart();
+    } catch (error) {
+        console.error("Error fetching cart:", error);
+    }
+}
 
 // Render products
 function renderProducts() {
@@ -16,7 +30,7 @@ function renderProducts() {
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
                 <p class="product-price">$${product.price.toFixed(2)}</p>
-                <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+                <button class="add-to-cart-btn" onclick="addToCart('${product.id}', '${product.name}', ${product.price}, '${product.image}')">
                     Add to Cart
                 </button>
             </div>
@@ -24,23 +38,49 @@ function renderProducts() {
     `).join('');
 }
 
-// Add to cart
-function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    const existingItem = cart.find(item => item.id === productId);
+// Add to cart (and update DynamoDB)
+async function addToCart(productId, name, price, image) {
+    const existingItem = cart.find(item => item.productId === productId);
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
-        cart.push({ ...product, quantity: 1 });
+        cart.push({ productId, name, price, image, quantity: 1 });
     }
 
+    await updateCartInDB();
     updateCart();
-    toggleCart(); // Show the cart when item is added
+    toggleCart(); // Show cart when item is added
 }
 
-// Update cart
+// Remove item from cart (DynamoDB)
+async function updateQuantity(productId, newQuantity) {
+    if (newQuantity < 1) {
+        cart = cart.filter(item => item.productId !== productId);
+    } else {
+        const item = cart.find(item => item.productId === productId);
+        if (item) {
+            item.quantity = newQuantity;
+        }
+    }
+
+    await updateCartInDB();
+    updateCart();
+}
+
+// Update DynamoDB when cart changes
+async function updateCartInDB() {
+    try {
+        await fetch(API_BASE_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: "123", cart }) // Replace "123" with actual user ID
+        });
+    } catch (error) {
+        console.error("Error updating cart in DB:", error);
+    }
+}
+
+// Update cart UI
 function updateCart() {
     const cartItems = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
@@ -53,9 +93,9 @@ function updateCart() {
                 <h4 class="cart-item-name">${item.name}</h4>
                 <p class="cart-item-price">$${item.price.toFixed(2)}</p>
                 <div class="cart-item-quantity">
-                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                    <button class="quantity-btn" onclick="updateQuantity('${item.productId}', ${item.quantity - 1})">-</button>
                     <span class="quantity-value">${item.quantity}</span>
-                    <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
+                    <button class="quantity-btn" onclick="updateQuantity('${item.productId}', ${item.quantity + 1})">+</button>
                 </div>
             </div>
         </div>
@@ -66,19 +106,6 @@ function updateCart() {
     cartTotal.textContent = `$${total.toFixed(2)}`;
 
     updateCartCount();
-}
-
-// Update quantity
-function updateQuantity(productId, newQuantity) {
-    if (newQuantity < 1) {
-        cart = cart.filter(item => item.id !== productId);
-    } else {
-        const item = cart.find(item => item.id === productId);
-        if (item) {
-            item.quantity = newQuantity;
-        }
-    }
-    updateCart();
 }
 
 // Update cart count
