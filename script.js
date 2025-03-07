@@ -67,14 +67,26 @@ async function updateQuantity(productId, newQuantity) {
     updateCart();
 }
 
-// Update DynamoDB when cart changes
-async function updateCartInDB() {
+async function updateCartInDB(productId, name, price, imageUrl, quantity) {
     try {
-        await fetch(API_BASE_URL, {
+        const response = await fetch(API_BASE_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: "123", cart }) // Replace "123" with actual user ID
+            body: JSON.stringify({
+                userId: "123", // 🔹 Replace with actual user ID if available
+                productId,
+                productName: name,
+                quantity,
+                price,
+                imageUrl
+            }),
         });
+
+        const result = await response.json();
+        console.log("Cart update response:", result);
+        
+        // Re-fetch cart to update UI
+        await fetchCart();
     } catch (error) {
         console.error("Error updating cart in DB:", error);
     }
