@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://pe8wxvomy6.execute-api.us-east-1.amazonaws.com/prod"; // Replace with actual API Gateway URL
+const API_BASE_URL = "https://1vdvb9orb2.execute-api.us-east-1.amazonaws.com/prod";
+ // Replace with actual API Gateway URL
 
 let cart = [];
 
