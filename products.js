@@ -1,6 +1,6 @@
 async function fetchProducts() {
     try {
-        const response = await fetch("https://pe8wxvomy6.execute-api.us-east-1.amazonaws.com/prod/products"); // Replace with your API Gateway URL
+        const response = await fetch("https://1vdvb9orb2.execute-api.us-east-1.amazonaws.com/prod/products"); // Replace with your API Gateway URL
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
